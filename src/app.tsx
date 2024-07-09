@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { CreateTripPage } from "./pages/create-trip";
+import { TripDetails } from "./pages/trip-details";
 
 const router = createBrowserRouter([
   {
@@ -8,7 +9,7 @@ const router = createBrowserRouter([
   },
   {
     path: "/trips/:tripId",
-    element: <div>TODO: Trip details</div>,
+    element: <TripDetails />,
   },
 ]);
 
