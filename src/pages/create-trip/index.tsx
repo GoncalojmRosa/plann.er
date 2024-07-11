@@ -1,10 +1,10 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { postTrip } from "../../api/routes";
 import { ConfirmTripModal } from "./confirm-trip-modal";
 import { InviteGuestsModal } from "./invite-guests-modal";
 import { DestinationAndDateStep } from "./steps/destination-and-date-step";
 import { InviteGuestsSteps } from "./steps/invite-guests-steps";
-import { api } from "../../lib/axios";
 
 export function CreateTripPage() {
   const [isGuestsInputOpen, setisGuestsInputOpen] = useState(false);
@@ -84,7 +84,7 @@ export function CreateTripPage() {
 
     if (!fields.ownerEmail || !fields.ownerName) return;
 
-    const { tripId } = await api.post("/trips", {
+    const { tripId } = await postTrip({
       destination: fields.destination,
       starts_at: fields.eventStartAndEndDate?.from,
       ends_at: fields.eventStartAndEndDate?.to,
@@ -92,7 +92,6 @@ export function CreateTripPage() {
       owner_name: fields.ownerName,
       owner_email: fields.ownerEmail,
     });
-
     navigate(`/trips/${tripId}`);
   }
 
