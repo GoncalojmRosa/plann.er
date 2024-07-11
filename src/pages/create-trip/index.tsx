@@ -4,6 +4,7 @@ import { ConfirmTripModal } from "./confirm-trip-modal";
 import { InviteGuestsModal } from "./invite-guests-modal";
 import { DestinationAndDateStep } from "./steps/destination-and-date-step";
 import { InviteGuestsSteps } from "./steps/invite-guests-steps";
+import { api } from "../../lib/axios";
 
 export function CreateTripPage() {
   const [isGuestsInputOpen, setisGuestsInputOpen] = useState(false);
@@ -16,6 +17,21 @@ export function CreateTripPage() {
   ]);
 
   const navigate = useNavigate();
+
+  // TODO: use debounce to prevent multiple calls
+  const [fields, setFields] = useState<{
+    destination: string;
+    ownerName: string;
+    ownerEmail: string;
+    eventStartAndEndDate?: { from: Date | undefined; to: Date | undefined };
+  }>({
+    destination: "",
+    ownerName: "",
+    ownerEmail: "",
+    eventStartAndEndDate: undefined,
+  });
+
+  console.log(fields);
 
   function openGuestsInput() {
     setisGuestsInputOpen(true);
@@ -58,9 +74,26 @@ export function CreateTripPage() {
     setEmailsToInvite(emailsToInvite.filter((e) => e !== email));
   }
 
-  function createTrip(event: FormEvent<HTMLFormElement>) {
+  async function createTrip(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    navigate("/trips/1");
+
+    if (!fields.destination) return;
+    if (!fields.eventStartAndEndDate?.from || !fields.eventStartAndEndDate.to)
+      return;
+    if (emailsToInvite.length === 0) return;
+
+    if (!fields.ownerEmail || !fields.ownerName) return;
+
+    const { tripId } = await api.post("/trips", {
+      destination: fields.destination,
+      starts_at: fields.eventStartAndEndDate?.from,
+      ends_at: fields.eventStartAndEndDate?.to,
+      emails_to_invite: emailsToInvite,
+      owner_name: fields.ownerName,
+      owner_email: fields.ownerEmail,
+    });
+
+    navigate(`/trips/${tripId}`);
   }
 
   return (
@@ -76,6 +109,20 @@ export function CreateTripPage() {
             closeGuestsInput={closeGuestsInput}
             isGuestsInputOpen={isGuestsInputOpen}
             openGuestsInput={openGuestsInput}
+            handleDestinationChange={(event) =>
+              setFields({ ...fields, destination: event.target.value })
+            }
+            handleEventStartAndEndDateChange={(date) =>
+              date &&
+              setFields({
+                ...fields,
+                eventStartAndEndDate: {
+                  from: date.from,
+                  to: date.to,
+                },
+              })
+            }
+            eventStartAndEndDate={fields.eventStartAndEndDate}
           />
 
           {isGuestsInputOpen && (
@@ -115,6 +162,14 @@ export function CreateTripPage() {
         <ConfirmTripModal
           closeConfirmTripModal={closeConfirmTripModal}
           createTrip={createTrip}
+          handleOwnerChange={(event) =>
+            setFields({ ...fields, ownerName: event.target.value })
+          }
+          handleOwnerEmailChange={(event) =>
+            setFields({ ...fields, ownerEmail: event.target.value })
+          }
+          currentEventDates={fields.eventStartAndEndDate}
+          currrentDestination={fields.destination}
         />
       )}
     </div>

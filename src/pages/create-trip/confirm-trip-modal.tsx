@@ -1,16 +1,34 @@
 import { Mail, Plus, User, X } from "lucide-react";
-import { FormEvent } from "react";
+import { ChangeEvent, FormEvent } from "react";
 import { Button } from "../../components/button";
+import { DateRange } from "react-day-picker";
+import { format } from "date-fns";
 
 interface ConfirmTripModalProps {
   closeConfirmTripModal: () => void;
   createTrip: (event: FormEvent<HTMLFormElement>) => void;
+  handleOwnerChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  handleOwnerEmailChange: (event: ChangeEvent<HTMLInputElement>) => void;
+  currentEventDates: DateRange | undefined;
+  currrentDestination: string;
 }
 
 export function ConfirmTripModal({
   closeConfirmTripModal,
   createTrip,
+  handleOwnerChange,
+  handleOwnerEmailChange,
+  currentEventDates,
+  currrentDestination,
 }: ConfirmTripModalProps) {
+  const dateFormatted =
+    currentEventDates && currentEventDates.from && currentEventDates.to
+      ? format(currentEventDates?.from as Date, "d")
+          .concat(" a ", format(currentEventDates?.to as Date, "d 'a' LLLL"))
+          .concat(" de ")
+          .concat(format(currentEventDates?.to as Date, "yyyy"))
+      : "";
+
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center">
       <div className="w-[640px] rounded-xl py-5 bg-zinc-900 px-6 shadow-shape space-y-5">
@@ -24,13 +42,10 @@ export function ConfirmTripModal({
           <p className="text-sm text-zinc-400">
             Para concluir a criação da viagem para
             <span className="font-semibold text-zinc-100">
-              {" "}
-              Lisboa, Portugal
+              {" " + currrentDestination + " "}
             </span>{" "}
             nas datas de{" "}
-            <span className="font-semibold text-zinc-100">
-              20 a 30 de Agosto de 2024{" "}
-            </span>
+            <span className="font-semibold text-zinc-100">{dateFormatted}</span>
             , preencha os seus dados abaixo:
           </p>
         </div>
@@ -41,6 +56,7 @@ export function ConfirmTripModal({
               type="text"
               placeholder="O seu nome completo"
               name="name"
+              onChange={handleOwnerChange}
               className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
             />
           </div>
@@ -51,6 +67,7 @@ export function ConfirmTripModal({
               type="text"
               placeholder="O seu email pessoal"
               name="email"
+              onChange={handleOwnerEmailChange}
               className="bg-transparent text-lg placeholder-zinc-400 outline-none flex-1"
             />
           </div>
