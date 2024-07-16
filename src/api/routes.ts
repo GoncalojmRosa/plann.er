@@ -82,6 +82,21 @@ export interface GetActivitiesResponse {
   activities: Activity[];
 }
 
+export interface GetLinksResponse {
+  /*
+  "links": [
+    {
+      "id": "123e4567-e89b-12d3-a456-426614174000",
+      "title": "…",
+      "url": "https://example.com"
+    }
+  ]
+    */
+  id: string;
+  title: string;
+  url: string;
+}
+
 export function postTrip(data: PostTrip): Promise<PostTripResponse> {
   return api
     .post("/trips", data)
@@ -126,6 +141,29 @@ export async function postActivity(
 ): Promise<PostActivityResponse> {
   return await api
     .post(`/trips/${tripId}/activities`, data)
+    .then((res) => res.data)
+    .catch((err) => {
+      console.error(err);
+    });
+}
+
+export async function getImportantLinks(
+  tripId: string
+): Promise<GetLinksResponse[]> {
+  return await api
+    .get(`/trips/${tripId}/links`)
+    .then((res) => res.data.links)
+    .catch((err) => {
+      console.error(err);
+    });
+}
+
+export async function postImportantLink(
+  tripId: string,
+  data: Omit<GetLinksResponse, "id">
+): Promise<PostTripResponse> {
+  return await api
+    .post(`/trips/${tripId}/links`, data)
     .then((res) => res.data)
     .catch((err) => {
       console.error(err);
